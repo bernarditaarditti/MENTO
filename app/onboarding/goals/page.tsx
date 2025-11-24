@@ -1,0 +1,89 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { useState } from "react"
+import { BackButton } from "@/components/back-button"
+
+export default function OnboardingGoalsPage() {
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
+
+  const goals = [
+    "Manejar el estrés",
+    "Mejorar la concentración",
+    "Cultivar pensamientos positivos",
+    "Resignificar mi forma de pensar",
+  ]
+
+  const toggleGoal = (goal: string) => {
+    setSelectedGoals((prev) => (prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]))
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background relative">
+      <div className="absolute top-10 left-10">
+        <BackButton />
+      </div>
+      <div className="w-full max-w-md flex flex-col items-center gap-12">
+        {/* Title */}
+        <div className="w-full flex flex-col items-center gap-8">
+          <h1 className="text-2xl font-bold text-center leading-relaxed" style={{ color: "#0096C7" }}>
+            Elegí tu objetivo principal:
+          </h1>
+
+          {/* Options with checkboxes */}
+          <div className="w-full flex flex-col gap-3 items-center">
+            {goals.map((goal) => (
+              <button
+                key={goal}
+                onClick={() => toggleGoal(goal)}
+                className="w-4/5 min-h-14 px-4 py-3 rounded-xl font-semibold text-base text-white transition-colors hover:opacity-90 flex items-center gap-3"
+                style={{
+                  backgroundColor: "#0096C7",
+                }}
+              >
+                {/* Checkbox square */}
+                <div
+                  className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center transition-colors"
+                  style={{
+                    backgroundColor: selectedGoals.includes(goal) ? "#00749A" : "transparent",
+                    border: selectedGoals.includes(goal) ? "none" : "2px solid white",
+                  }}
+                >
+                  {selectedGoals.includes(goal) && (
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="3"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-left">{goal}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Start button */}
+        <div className="w-full mt-auto flex justify-center">
+          <Link href="/home" className="block w-4/5">
+            <Button
+              size="lg"
+              className="w-full font-semibold text-base h-14 rounded-xl text-white hover:opacity-90"
+              style={{ backgroundColor: "#FF6171" }}
+              disabled={selectedGoals.length === 0}
+            >
+              ¡EMPECEMOS!
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
