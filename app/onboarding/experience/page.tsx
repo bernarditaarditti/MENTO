@@ -4,17 +4,24 @@ import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/back-button"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useAuth } from "@/context/AuthContext"
+import { useOnboarding } from "@/context/OnboardingContext"
 
 export default function OnboardingExperiencePage() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { user } = useAuth()
+  const { update } = useOnboarding()
 
   const options = ["Sí", "No"]
 
-  const handleContinue = () => {
-    if (selectedOption) {
-      router.push("/onboarding/emotional-intensity")
-    }
+  const handleContinue = async () => {
+    if (!selectedOption) return
+    setIsLoading(true)
+    update({ experiencia: selectedOption })
+    setIsLoading(false)
+    router.push("/onboarding/emotional-intensity")
   }
 
   return (
@@ -54,9 +61,9 @@ export default function OnboardingExperiencePage() {
             size="lg"
             onClick={handleContinue}
             className="w-4/5 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-base h-14 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!selectedOption}
+            disabled={!selectedOption || isLoading}
           >
-            CONTINUAR
+            {isLoading ? "Guardando..." : "CONTINUAR"}
           </Button>
         </div>
       </div>

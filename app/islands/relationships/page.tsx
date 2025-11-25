@@ -85,21 +85,25 @@ export default function RelationshipsIslandPage() {
   const totalLevels = 5
 
   const getLevelColor = (level: number) => {
-    // Si el nivel es mayor al actual, usa el color rosa claro
-    if (level > currentLevel) {
-      return "#FEBAB2"
+    // Completado: #FF916D (naranja/coral)
+    if (completedLevels.has(level)) {
+      return "#FF916D"
     }
-    // El nivel 1 siempre usa el color principal #FE814A
-    if (level === 1) {
-      return "#FE814A"
+    // Nivel actual (disponible para jugar): #FF916D (naranja/coral)
+    if (level === currentLevel) {
+      return "#FF916D"
     }
-    // Los niveles 2-5 usan el color #FEBAB2 cuando están activos
-    return "#FEBAB2"
+    // Bloqueado: #FFAAA0 (rosa claro)
+    return "#FFAAA0"
   }
 
   const getStarColor = (level: number) => {
-    // Todas las estrellas son grises
-    return "#9CA3AF"
+    // Completado o nivel actual: estrella amarilla #FFBC03
+    if (completedLevels.has(level) || level === currentLevel) {
+      return "#FFBC03"
+    }
+    // Bloqueado: estrella gris #A6A6A5
+    return "#A6A6A5"
   }
 
   // Posiciones zigzag para los niveles - formato zigzag más separado

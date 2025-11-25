@@ -4,17 +4,30 @@ import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/back-button"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useAuth } from "@/context/AuthContext"
+import { useOnboarding } from "@/context/OnboardingContext"
 
 export default function OnboardingGenderPage() {
-  const [selectedGender, setSelectedGender] = useState<string | null>(null)
+  const [selectedGender, setSelectedGender] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { user } = useAuth()
+  const { update } = useOnboarding()
 
-  const genderOptions = ["Femenino", "Masculino", "No binario", "Prefiero no decirlo"]
+  // Mapeo a los ids de la tabla Genero
+  const genderOptions: { id: number; label: string }[] = [
+    { id: 2, label: "Femenino" },
+    { id: 1, label: "Masculino" },
+    { id: 3, label: "No binario" },
+    { id: 4, label: "Prefiero no decirlo" },
+  ]
 
-  const handleContinue = () => {
-    if (selectedGender) {
-      router.push("/onboarding/experience")
-    }
+  const handleContinue = async () => {
+    if (selectedGender === null) return
+    setIsLoading(true)
+    update({ genero: selectedGender })
+    setIsLoading(false)
+    router.push("/onboarding/experience")
   }
 
   return (
@@ -33,16 +46,16 @@ export default function OnboardingGenderPage() {
           <div className="w-full flex flex-col gap-3 items-center">
             {genderOptions.map((option) => (
               <Button
-                key={option}
-                onClick={() => setSelectedGender(option)}
+                key={option.id}
+                onClick={() => setSelectedGender(option.id)}
                 size="lg"
                 className="w-4/5 h-14 rounded-xl font-semibold text-base transition-colors"
                 style={{
-                  backgroundColor: selectedGender === option ? "#00749A" : "#0096C7",
+                  backgroundColor: selectedGender === option.id ? "#00749A" : "#0096C7",
                   color: "white",
                 }}
               >
-                {option}
+                {option.label}
               </Button>
             ))}
           </div>
@@ -54,9 +67,9 @@ export default function OnboardingGenderPage() {
             size="lg"
             onClick={handleContinue}
             className="w-4/5 bg-accent hover:bg-accent/90 text-white font-bold text-base h-14 rounded-xl uppercase disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!selectedGender}
+            disabled={!selectedGender || isLoading}
           >
-            CONTINUAR
+            {isLoading ? "Guardando..." : "CONTINUAR"}
           </Button>
         </div>
       </div>

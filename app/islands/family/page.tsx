@@ -85,21 +85,25 @@ export default function FamilyIslandPage() {
   const totalLevels = 5
 
   const getLevelColor = (level: number) => {
-    // Si el nivel es mayor al actual, usa el color amarillo claro
-    if (level > currentLevel) {
-      return "#FFDF87"
-    }
-    // El nivel 1 siempre usa el color amarillo #FFC832
-    if (level === 1) {
+    // Completado: #FFC832 (naranja/amarillo oscuro)
+    if (completedLevels.has(level)) {
       return "#FFC832"
     }
-    // Los niveles 2-5 usan el color #FFDF87 cuando están activos
+    // Nivel actual (disponible para jugar): #FFC832 (naranja/amarillo oscuro)
+    if (level === currentLevel) {
+      return "#FFC832"
+    }
+    // Bloqueado: #FFDF87 (amarillo claro)
     return "#FFDF87"
   }
 
   const getStarColor = (level: number) => {
-    // Todas las estrellas son grises
-    return "#9CA3AF"
+    // Completado o nivel actual: estrella amarilla #FFBC03
+    if (completedLevels.has(level) || level === currentLevel) {
+      return "#FFBC03"
+    }
+    // Bloqueado: estrella gris #A6A6A5
+    return "#A6A6A5"
   }
 
   // Posiciones zigzag para los niveles - formato zigzag más separado

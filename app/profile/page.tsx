@@ -3,6 +3,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { BackButton } from "@/components/back-button"
+import { useEffect, useState } from "react"
+import { useAuth } from "@/context/AuthContext"
+import { useOnboarding } from "@/context/OnboardingContext"
 
 export default function ProfilePage() {
   // Obtener el mes y año actual para "Se unió en"
@@ -13,6 +16,34 @@ export default function ProfilePage() {
   ]
   const month = months[currentDate.getMonth()]
   const year = currentDate.getFullYear()
+
+  const { user } = useAuth()
+  const { data: onboardingData, update } = useOnboarding()
+  const [displayName, setDisplayName] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (onboardingData?.nombre) {
+      setDisplayName(onboardingData.nombre)
+      return
+    }
+
+    const fetchOnboarding = async () => {
+      if (!user?.id_usuario) return
+      try {
+        const res = await fetch(`/api/onboarding/${user.id_usuario}`)
+        const json = await res.json()
+        if (json.success && json.data) {
+          const name = json.data.nombre || null
+          setDisplayName(name)
+          if (name) update({ nombre: name })
+        }
+      } catch (e) {
+        console.error("Error fetching onboarding for profile:", e)
+      }
+    }
+
+    fetchOnboarding()
+  }, [onboardingData, user, update])
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -33,7 +64,7 @@ export default function ProfilePage() {
         {/* User Info */}
         <div className="flex flex-col items-center gap-1 mb-8">
           <p className="text-lg font-medium" style={{ fontFamily: "var(--font-poppins)", color: "#0096C7" }}>
-            Nombre de usuario
+            {displayName || user?.email || "Usuario"}
           </p>
           <p className="text-base" style={{ fontFamily: "var(--font-poppins)", color: "#0096C7" }}>
             Se unió en {month} de {year}

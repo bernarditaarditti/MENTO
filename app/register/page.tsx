@@ -5,17 +5,42 @@ import { useRouter } from "next/navigation"
 import { ForwardArrow } from "@/components/forward-arrow"
 import Link from "next/link"
 import { BackButton } from "@/components/back-button"
+import { registerUser } from "@/lib/api"
+import { useAuth } from "@/context/AuthContext"
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = () => {
-    if (email.trim() && password.trim()) {
-      // TODO: Add registration logic here
-      // After registration, continue to onboarding
+  const handleSubmit = async () => {
+    if (!email.trim() || !password.trim()) return
+
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const response = await registerUser(email, password)
+
+      if (!response.success) {
+        setError(response.message || "Error al registrarse")
+        setIsLoading(false)
+        return
+      }
+
+      // Si el registro es exitoso, guardar usuario en el contexto y ir al onboarding
+      if (response.data?.user) {
+        login(response.data.user)
+      }
+
       router.push("/onboarding/welcome")
+    } catch (err) {
+      console.error("Error en registro:", err)
+      setError("Error de conexión con el servidor")
+      setIsLoading(false)
     }
   }
 
@@ -38,23 +63,34 @@ export default function RegisterPage() {
             type="email"
             placeholder="E-mail"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setError("")
+            }}
             className="w-4/5 px-6 py-4 bg-[#E2E2E2] rounded-xl text-[#FF6171] placeholder:text-[#FF6171]/60 text-base focus:outline-none focus:ring-2 focus:ring-accent"
           />
           <input
             type="password"
             placeholder="Contraseña"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              setError("")
+            }}
             className="w-4/5 px-6 py-4 bg-[#E2E2E2] rounded-xl text-[#FF6171] placeholder:text-[#FF6171]/60 text-base focus:outline-none focus:ring-2 focus:ring-accent"
           />
+          {error && (
+            <div className="w-4/5 px-4 py-3 bg-red-100 border border-red-300 rounded-xl text-red-700 text-sm text-center">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Submit button */}
         <div className="flex justify-end pr-8">
           <button
             onClick={handleSubmit}
-            disabled={!isValid}
+            disabled={!isValid || isLoading}
             className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Continuar"
           >

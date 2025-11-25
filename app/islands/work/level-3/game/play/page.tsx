@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { BackButton } from "@/components/back-button"
+import useProgress from "@/hooks/use-progress"
 
 export default function WorkLevel3PlayPage() {
   const router = useRouter()
@@ -58,9 +59,22 @@ export default function WorkLevel3PlayPage() {
     }
   }
 
-  const handleSuccessPopupClick = () => {
-    // Cuando el usuario presiona la pantalla, redirigir al siguiente nivel
-    router.push("/islands/work")
+  const pathname = usePathname()
+  const { saveProgress } = useProgress()
+
+  const handleSuccessPopupClick = async () => {
+    // Cuando el usuario presiona la pantalla, guardar progreso y redirigir
+    const path = pathname || (typeof window !== "undefined" ? window.location.pathname : "")
+    const levelMatch = path.match(/level-(\d+)/)
+    const levelNum = levelMatch ? parseInt(levelMatch[1], 10) : 3
+    const islandMatch = path.match(/islands\/([^\/]+)/)
+    const islandKey = islandMatch ? islandMatch[1] : "work"
+    const ISLAND_MAP: Record<string, number> = { work: 1, family: 2, relationships: 3, health: 4 }
+    const idIsla = ISLAND_MAP[islandKey] ?? 1
+
+    try { await saveProgress(idIsla, levelNum) } catch (e) { }
+
+    router.push(`/islands/${islandKey}`)
   }
 
   const handleRetry = () => {

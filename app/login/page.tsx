@@ -5,52 +5,45 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { BackButton } from "@/components/back-button"
 import { ForwardArrow } from "@/components/forward-arrow"
+import { loginUser } from "@/lib/api"
+import { useAuth } from "@/context/AuthContext"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async () => {
-    if (email.trim() && password.trim()) {
-      setError("")
-      setIsLoading(true)
-      
-      try {
-        // TODO: Replace with actual authentication API call
-        // Example: const response = await fetch('/api/auth/login', { ... })
-        // For now, simulate authentication
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        })
+  if (!email.trim() || !password.trim()) return;
 
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}))
-          if (response.status === 401 || data.error?.includes('contraseña') || data.error?.includes('password')) {
-            setError("Contraseña incorrecta")
-          } else {
-            setError(data.error || "Error al iniciar sesión")
-          }
-          setIsLoading(false)
-          return
-        }
+  setError("");
+  setIsLoading(true);
 
-        // Success - redirect to home
-        router.push("/home")
-      } catch (err) {
-        // If API doesn't exist yet, simulate error for wrong password
-        // Remove this catch block once real API is implemented
-        setError("Contraseña incorrecta")
-        setIsLoading(false)
-      }
+  try {
+    const response = await loginUser(email, password);
+
+    if (!response.success) {
+      setError(response.message || "Error al iniciar sesión");
+      setIsLoading(false);
+      return;
     }
+
+    // Guardar usuario en el context
+    if (response.data?.user) {
+      login(response.data.user);
+    }
+
+    router.push("/home");
+
+  } catch (err) {
+    console.error("Error en login:", err);
+    setError("Error de conexión con el servidor.");
+    setIsLoading(false);
   }
+};
 
   const isValid = email.trim() !== "" && password.trim() !== ""
 

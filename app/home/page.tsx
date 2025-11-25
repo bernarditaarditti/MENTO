@@ -1,15 +1,49 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { useAuth } from "@/context/AuthContext"
 import { WorkIsland } from "@/components/islands/work-island"
 import { FamilyIsland } from "@/components/islands/family-island"
 import { RelationshipsIsland } from "@/components/islands/relationships-island"
 import { HealthIsland } from "@/components/islands/health-island"
 
 export default function HomePage() {
+  const router = useRouter()
+  const { user, isLoggedIn, isLoading } = useAuth()
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+
+  useEffect(() => {
+    // Redirigir si no está logueado
+    if (!isLoading && !isLoggedIn) {
+      router.push("/login")
+    } else if (!isLoading) {
+      setIsInitialLoading(false)
+    }
+  }, [isLoading, isLoggedIn, router])
+
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="inline-block animate-spin">
+            <div className="w-12 h-12 border-4 border-[#00C49A] border-t-transparent rounded-full"></div>
+          </div>
+          <p className="text-[#0096C7] mt-4">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* Header con datos del usuario */}
+      <div className="px-4 pt-4 pb-2 border-b border-[#E2E2E2]">
+        <p className="text-[#0096C7] text-sm">Bienvenido, <span className="font-semibold">{user?.email}</span></p>
+      </div>
+
       {/* Main content */}
       <div className="flex-1 px-4 pt-6 pb-24 flex flex-col overflow-hidden">
         <h1 className="text-[#FF6171] text-2xl font-bold text-center mb-6 flex-shrink-0">Recorre islas</h1>

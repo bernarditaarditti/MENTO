@@ -86,17 +86,25 @@ export default function WorkIslandPage() {
   const totalLevels = 5
 
   const getLevelColor = (level: number) => {
-    // Si el nivel es <= nivel actual, usa el color azul #0096C7
-    // Si es mayor, usa el color gris claro #FFAC88
-    if (level <= currentLevel) {
+    // Completado: #0096C7 (azul)
+    if (completedLevels.has(level)) {
       return "#0096C7"
     }
-    return "#FFAC88"
+    // Nivel actual (disponible para jugar): #0096C7 (azul)
+    if (level === currentLevel) {
+      return "#0096C7"
+    }
+    // Bloqueado: #ACD7E5 (azul claro)
+    return "#ACD7E5"
   }
 
   const getStarColor = (level: number) => {
-    // Todas las estrellas son grises
-    return "#9CA3AF"
+    // Completado o nivel actual: estrella amarilla #FFBC03
+    if (completedLevels.has(level) || level === currentLevel) {
+      return "#FFBC03"
+    }
+    // Bloqueado: estrella gris #A6A6A5
+    return "#A6A6A5"
   }
 
   // Posiciones zigzag para los niveles - formato zigzag más separado

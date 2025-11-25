@@ -5,15 +5,22 @@ import { BackButton } from "@/components/back-button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useAuth } from "@/context/AuthContext"
+import { useOnboarding } from "@/context/OnboardingContext"
 
 export default function OnboardingNamePage() {
   const [name, setName] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { user } = useAuth()
+  const { update } = useOnboarding()
 
-  const handleContinue = () => {
-    if (name.trim()) {
-      router.push("/onboarding/age")
-    }
+  const handleContinue = async () => {
+    if (!name.trim()) return
+    setIsLoading(true)
+    update({ nombre: name })
+    setIsLoading(false)
+    router.push("/onboarding/age")
   }
 
   return (
@@ -47,9 +54,9 @@ export default function OnboardingNamePage() {
             size="lg"
             onClick={handleContinue}
             className="w-4/5 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-base h-14 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!name.trim()}
+            disabled={!name.trim() || isLoading}
           >
-            CONTINUAR
+            {isLoading ? "Guardando..." : "CONTINUAR"}
           </Button>
         </div>
       </div>

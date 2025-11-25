@@ -5,12 +5,22 @@ import { BackButton } from "@/components/back-button"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useAuth } from "@/context/AuthContext"
+import { useOnboarding } from "@/context/OnboardingContext"
 
 export default function OnboardingEmotionalIntensityPage() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null)
+  const [selectedOption, setSelectedOption] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { user } = useAuth()
+  const { update } = useOnboarding()
 
-  const options = ["Muy intenso", "Moderado", "Tranquilo"]
+  // Mapeo a ids de la tabla Intensidad
+  const options: { id: number; label: string }[] = [
+    { id: 1, label: "Muy intenso" },
+    { id: 2, label: "Moderado" },
+    { id: 3, label: "Tranquilo" },
+  ]
 
   const iconByOption: Record<string, string> = {
     "Muy intenso": "/images/icono-panico.png",
@@ -18,10 +28,12 @@ export default function OnboardingEmotionalIntensityPage() {
     Tranquilo: "/images/emoji.png",
   }
 
-  const handleContinue = () => {
-    if (selectedOption) {
-      router.push("/onboarding/goals")
-    }
+  const handleContinue = async () => {
+    if (!selectedOption) return
+    setIsLoading(true)
+    update({ intensidad: selectedOption })
+    setIsLoading(false)
+    router.push("/onboarding/goals")
   }
 
   return (
@@ -42,23 +54,23 @@ export default function OnboardingEmotionalIntensityPage() {
           <div className="w-full flex flex-col gap-3 items-center">
             {options.map((option) => (
               <button
-                key={option}
-                onClick={() => setSelectedOption(option)}
+                key={option.id}
+                onClick={() => setSelectedOption(option.id)}
                 className="w-4/5 min-h-20 py-3 rounded-xl font-semibold text-base text-white transition-colors hover:opacity-90 flex items-center gap-3 px-3"
                 style={{
-                  backgroundColor: selectedOption === option ? "#00749A" : "#0096C7",
+                  backgroundColor: selectedOption === option.id ? "#00749A" : "#0096C7",
                 }}
               >
                 <span className="flex items-center justify-center">
                   <Image
-                    src={iconByOption[option] ?? "/placeholder.svg"}
-                    alt={option}
+                    src={iconByOption[option.label] ?? "/placeholder.svg"}
+                    alt={option.label}
                     width={64}
                     height={64}
                     className="object-contain"
                   />
                 </span>
-                <span className="text-left flex-1">{option}</span>
+                <span className="text-left flex-1">{option.label}</span>
               </button>
             ))}
           </div>
@@ -70,9 +82,9 @@ export default function OnboardingEmotionalIntensityPage() {
             size="lg"
             onClick={handleContinue}
             className="w-4/5 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-base h-14 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!selectedOption}
+            disabled={selectedOption === null || isLoading}
           >
-            CONTINUAR
+            {isLoading ? "Guardando..." : "CONTINUAR"}
           </Button>
         </div>
       </div>
